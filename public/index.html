@@ -7,17 +7,28 @@
     <link rel="stylesheet" href="static/style.css" />
   </head>
   <body>
-    <div class="search-container">
-      <input
-        type="text"
-        id="search-input"
-        placeholder="Input the song's title..."
-      />
-      <button id="search-btn">Search</button>
-    </div>
+    <main class="container">
+      <h1>Download audio</h1>
 
-    <div id="results"></div>
-    <div id="message"></div>
+      <p class="subtitle">
+        Paste a Youtube link and download the audio as MP3.
+      </p>
+
+      <form id="downloadForm">
+        <label for="videoUrl"> Youtube URL </label>
+
+        <input
+          type="url"
+          id="videoUrl"
+          placeholder="https://www.youtube.com/watch?v=..."
+          required
+        />
+
+        <button type="submit" id="downloadButton">Download MP3</button>
+      </form>
+
+      <p id="status" aria-live="polite"></p>
+    </main>
 
     <script src="static/main.js"></script>
   </body>

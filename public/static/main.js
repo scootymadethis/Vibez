@@ -1,97 +1,67 @@
-const API_KEY = "AIzaSyA9NTkyJ1TP7t_TjX3YyrqmvNSl1WB7Qys";
+const downloadForm = document.getElementById("downloadForm");
+const videoUrlInput = document.getElementById("videoUrl");
+const downloadButton = document.getElementById("downloadButton");
+const statusElement = document.getElementById("status");
 
-const searchInput = document.getElementById("search-input");
-const searchBtn = document.getElementById("search-btn");
-const resultsDiv = document.getElementById("results");
-const messageDiv = document.getElementById("message");
+downloadForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-searchBtn.addEventListener("click", searchVideos);
+  const url = videoUrlInput.value.trim();
 
-searchInput.addEventListener("keydown", function (event) {
-    if(event.key === "Enter") {
-        searchVideos();
-    }
-})
+  if (!url) {
+    showStatus("Insert an URL.", "error");
+    return;
+  }
 
-async function searchVideos() {
-    const query = searchInput.value.trim();
+  setLoading(true);
+  showStatus("Downloading and processing...", "");
 
-    if(!query) {
-        showMessage("You have to type something to search.", true);
-        return;
-    }
-
-    showMessage("Search in progress...");
-    resultsDiv.innerHTML = "";
-
-    const params = new URLSearchParams({
-        part: "snippet",
-        q: query,
-        type: "video",
-        maxResults: "10",
-        key: API_KEY
+  try {
+    const response = await fetch("/api/download", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url: url,
+      }),
     });
 
-    const url = `https://www.googleapis.com/youtube/v3/search?${params}`;
-
-    try {
-        const response = await fetch(url);
-        
-        if(!response.ok) {
-            const errorData = await response.json();
-
-            throw new Error(errorData.error?.message || "Error during search.");
-        }
-
-        const data = await response.json();
-
-        if(!data.items || data.items.length === 0) {
-            showMessage("No video found.");
-            return;
-        }
-
-        showMessage("");
-        displayVideos(data.items);
-    } catch (error) {
-        console.error(error);
-        showMessage(error.message, true);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error during download.");
     }
+
+    const audioBlob = await response.blob();
+    const temporaryUrl = URL.createObjectURL(audioBlob);
+    const link = document.createElement("a");
+
+    link.href = temporaryUrl;
+    link.download = "audio.mp3";
+
+    document.body.appendChild(link);
+
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(temporaryUrl);
+
+    showStatus("Download completed.", "success");
+  } catch (error) {
+    console.error(error);
+    showStatus(error.message, "error");
+  } finally {
+    setLoading(false);
+  }
+});
+
+function setLoading(isLoading) {
+  downloadButton.disabled = isLoading;
+  videoUrlInput.disabled = isLoading;
+
+  downloadButton.textContent = isLoading ? "Elaborating..." : "Download MP3";
 }
 
-function displayVideos(videos) {
-    resultsDiv.innerHTML = "";
-
-    videos.forEach(function (video) {
-        const videoId = video.id.videoId;
-        const title = video.snippet.title;
-        const channelTitle = video.snippet.channelTitle;
-        const description = video.snippet.description;
-        const thumbnail = video.snippet.thumbnails.medium.url;
-        const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-
-        const videoElement = document.createElement("div");
-        videoElement.classList.add("video");
-
-        videoElement.innerHTML = `
-            <img src="${thumbnail}" alt="">
-            <div>
-                <h2></h2>
-                <p class="channel"></p>
-                <p class="description"></p>
-
-                <a href="${videoUrl}" target="_blank" rel="noopener noreferrer">Watch on Youtube</a>
-            </div>
-        `;
-
-        videoElement.querySelector("h2").textContent = title;
-        videoElement.querySelector(".channel").textContent = `Channel: ${channelTitle}`;
-        videoElement.querySelector(".description").textContent = description || "No description available.";
-
-        resultsDiv.appendChild(videoElement);
-    })
-}
-
-function showMessage(text, isError = false) {
-    messageDiv.textContent = text;
-    messageDiv.className = isError ? "error" : "";
+function showStatus(message, type) {
+  statusElement.textContent = message;
+  statusElement.className = type;
 }
