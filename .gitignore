@@ -1,40 +1,42 @@
+# Dipendenze
 node_modules/
 
-downloads/
-*.mp3
-*.m4a
-*.webm
-*.opus
-*.mkv
-*.mp4
-*.part
-*.ytdl
-
+# Variabili e segreti
 .env
 .env.*
 !.env.example
 
+# File generati
+storage/*
+!storage/.gitkeep
+downloads/*
+!downloads/.gitkeep
+
+# Audio e video
+*.mp3
+*.m4a
+*.webm
+*.mp4
+*.ogg
+*.wav
+
+# Log
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 
+# Coverage e cache
+coverage/
 .cache/
-.npm/
-.eslintcache
+.tmp/
+temp/
 
-dist/
-build/
-
-.DS_Store
-Thumbs.db
-desktop.ini
-
+# Editor
 .vscode/
 .idea/
 
-tmp/
-temp/
-*.tmp
+# Sistema operativo
+.DS_Store
+Thumbs.db

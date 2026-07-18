@@ -4,8 +4,10 @@ const fs = require("node:fs");
 const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 
+const config = require("./src/config/env.js");
+
 const app = express();
-const PORT = 3000;
+const PORT = config.port;
 
 const publicDirectory = path.join(__dirname, "public");
 const audioDirectory = path.join(__dirname, "audio-cache");
