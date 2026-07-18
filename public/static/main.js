@@ -1,51 +1,47 @@
-const downloadForm = document.getElementById("downloadForm");
+const form = document.getElementById("audioForm");
 const videoUrlInput = document.getElementById("videoUrl");
-const downloadButton = document.getElementById("downloadButton");
+const playButton = document.getElementById("playButton");
 const statusElement = document.getElementById("status");
+const audioPlayer = document.getElementById("audioPlayer");
+const loadingIndicator = document.getElementById("loadingIndicator");
 
-downloadForm.addEventListener("submit", async (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const url = videoUrlInput.value.trim();
 
   if (!url) {
-    showStatus("Insert an URL.", "error");
+    showStatus("Insert an URL.");
     return;
   }
 
   setLoading(true);
-  showStatus("Downloading and processing...", "");
+  showStatus("Preparing audio...");
 
   try {
-    const response = await fetch("/api/download", {
+    const response = await fetch("/api/prepare-audio", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        url: url,
-      }),
+      body: JSON.stringify({ url }),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Error during download.");
+      throw new Error(data.error || "Unable to prepare audio.");
     }
 
-    const audioBlob = await response.blob();
-    const temporaryUrl = URL.createObjectURL(audioBlob);
-    const link = document.createElement("a");
+    audioPlayer.pause();
+    audioPlayer.src = "";
 
-    link.href = temporaryUrl;
-    link.download = "audio.mp3";
+    audioPlayer.src = `/api/audio/${data.audioId}`;
+    audioPlayer.hidden = false;
 
-    document.body.appendChild(link);
+    await audioPlayer.play();
 
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(temporaryUrl);
-
-    showStatus("Download completed.", "success");
+    showStatus("Song started.", "success");
   } catch (error) {
     console.error(error);
     showStatus(error.message, "error");
@@ -55,13 +51,14 @@ downloadForm.addEventListener("submit", async (event) => {
 });
 
 function setLoading(isLoading) {
-  downloadButton.disabled = isLoading;
+  loadingIndicator.hidden = !isLoading;
+  playButton.disabled = isLoading;
   videoUrlInput.disabled = isLoading;
 
-  downloadButton.textContent = isLoading ? "Elaborating..." : "Download MP3";
+  playButton.textContent = isLoading ? "Preparing..." : "Listen";
 }
 
-function showStatus(message, type) {
+function showStatus(message, type = "") {
   statusElement.textContent = message;
   statusElement.className = type;
 }

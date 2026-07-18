@@ -3,32 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark">
     <title>Vibez</title>
     <link rel="stylesheet" href="static/style.css" />
   </head>
   <body>
-    <main class="container">
-      <h1>Download audio</h1>
+    <main>
+      <header>
+        <p class="eyebrow">Vibez</p>
+        <h1>Listen to your music</h1>
+        <p class="subtitle">
+          Paste a Youtube link and listen to the music you like!
+        </p>
+      </header>
+    </main>
 
-      <p class="subtitle">
-        Paste a Youtube link and download the audio as MP3.
-      </p>
-
-      <form id="downloadForm">
-        <label for="videoUrl"> Youtube URL </label>
-
+    <form id="audioForm">
+      <div class="field">
+        <label for="videoUrl">Youtube URL</label>
         <input
           type="url"
           id="videoUrl"
           placeholder="https://www.youtube.com/watch?v=..."
           required
         />
+      </div>
 
-        <button type="submit" id="downloadButton">Download MP3</button>
-      </form>
+      <button type="submit" id="playButton">Listen</button>
+    </form>
 
-      <p id="status" aria-live="polite"></p>
-    </main>
+    <section class="player-section" aria-labelledby="playerTitle">
+      <h2 id="playerTitle" class="sr-only">Audio player</h2>
+
+      <div id="loadingIndicator" class="loading" hidden>Preparing audio...</div>
+      <p id="status" role="status" aria-live="polite"></p>
+      <audio
+        id="audioPlayer"
+        controls
+        controlsList="nodownload"
+        preload="metadata"
+        hidden
+      >Your browser does not support audio playback.</audio>
+    </section>
+
+    <footer>
+      <p>Copyright Vibez 2026</p>
+    </footer>
 
     <script src="static/main.js"></script>
   </body>
